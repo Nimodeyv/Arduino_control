@@ -7,20 +7,19 @@
  * Tutorial page: https://arduinogetstarted.com/tutorials/arduino-rotary-encoder
  */
 
-// #include <ezButton.h>  // the library to use for SW pin
-
+// ENCODER
 #define CLK_PIN 2
 #define DT_PIN 3
 
+// LAMPES LEDS
 #define LED_PIN 4
 #define NB_PULSE_BEFORE_LIGHT_ON 1500
 #define LED_TIME_ON 50 // ms OFF pour l'essai
 
-#define DIRECTION_CW 0  // clockwise direction
-#define DIRECTION_CCW 1 // counter-clockwise direction
+// CAMERA
+#define CAMERA_PIN 12
 
 volatile int counter = 0;
-volatile int direction = DIRECTION_CW;
 volatile unsigned long last_time; // for debouncing
 int prev_counter;
 
@@ -35,13 +34,11 @@ void ISR_encoderChange()
   {
     // the encoder is rotating in counter-clockwise direction => decrease the counter
     counter--;
-    direction = DIRECTION_CCW;
   }
   else
   {
     // the encoder is rotating in clockwise direction => increase the counter
     counter++;
-    direction = DIRECTION_CW;
   }
 
   last_time = micros();
@@ -55,13 +52,13 @@ void setup()
   pinMode(CLK_PIN, INPUT);
   pinMode(DT_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
-  // button.setDebounceTime(50);  // set debounce time to 50 milliseconds
+  pinMode(CAMERA_PIN, OUTPUT);
 
-  // use interrupt for CLK pin is enough
   // call ISR_encoderChange() when CLK pin changes from LOW to HIGH
   attachInterrupt(digitalPinToInterrupt(CLK_PIN), ISR_encoderChange, RISING);
 
   digitalWrite(LED_PIN, HIGH);
+  digitalWrite(CAMERA_PIN, LOW);
 }
 
 void loop()
@@ -71,24 +68,20 @@ void loop()
   while (true)
     if (prev_counter != counter)
     {
-      Serial.print("DIRECTION: ");
-      if (direction == DIRECTION_CW)
-        Serial.print("horaire");
-      else
-        Serial.print("anti-horaire");
-
-      Serial.print(" | Compteur: ");
+      Serial.print("Compteur: ");
       Serial.println(counter);
 
       prev_counter = counter;
 
       if (counter > NB_PULSE_BEFORE_LIGHT_ON)
       {
-        Serial.println("LED OFF");
+        Serial.println("LAMPES ON (ROUGE ETEINT) - CAMERA ON (VERT ALLUME)");
         digitalWrite(LED_PIN, LOW);
+        digitalWrite(CAMERA_PIN, HIGH);
         delay(LED_TIME_ON);
         counter = 0;
         digitalWrite(LED_PIN, HIGH);
+        digitalWrite(CAMERA_PIN, LOW);
       }
     }
 }
