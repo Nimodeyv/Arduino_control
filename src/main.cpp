@@ -13,6 +13,7 @@
 #define DT_PIN 3
 
 #define LED_PIN 4
+#define NB_PULSE_BEFORE_LIGHT_ON 1500
 #define LED_TIME_ON 50 // ms OFF pour l'essai
 
 #define DIRECTION_CW 0  // clockwise direction
@@ -67,26 +68,27 @@ void loop()
 {
   // button.loop();  // MUST call the loop() function first
 
-  if (prev_counter != counter)
-  {
-    Serial.print("DIRECTION: ");
-    if (direction == DIRECTION_CW)
-      Serial.print("horaire");
-    else
-      Serial.print("anti-horaire");
-
-    Serial.print(" | Compteur: ");
-    Serial.println(counter);
-
-    prev_counter = counter;
-
-    if (counter > 1000)
+  while (true)
+    if (prev_counter != counter)
     {
-      Serial.println("LED OFF");
-      digitalWrite(LED_PIN, LOW);
-      delay(LED_TIME_ON);
-      counter = 0;
-      digitalWrite(LED_PIN, HIGH);
+      Serial.print("DIRECTION: ");
+      if (direction == DIRECTION_CW)
+        Serial.print("horaire");
+      else
+        Serial.print("anti-horaire");
+
+      Serial.print(" | Compteur: ");
+      Serial.println(counter);
+
+      prev_counter = counter;
+
+      if (counter > NB_PULSE_BEFORE_LIGHT_ON)
+      {
+        Serial.println("LED OFF");
+        digitalWrite(LED_PIN, LOW);
+        delay(LED_TIME_ON);
+        counter = 0;
+        digitalWrite(LED_PIN, HIGH);
+      }
     }
-  }
 }
